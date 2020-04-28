@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>照相机</title>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        .camera_wrap{
+            text-align: center;
+            width: 40%;
+            margin-left: 5%;
+            float: left;
+        }
+        #camera{
+            width: 100%;
+            /* height: 240px; */
+        }
+        #camera video{
+            width: 100%;
+        }
+        .btn{
+            display: inline-block;
+            cursor: pointer;
+            width: 100px;
+            height: 40px;
+            background-color: cornflowerblue;
+            border-radius: 5px;
+            margin-top: 15px;
+            color: #fff;
+            line-height: 40px;
+            text-align: center;
+        }
+        .image_view{
+            display: none;
+            width: 40%;
+            margin-right: 5%;
+            float: right;
+        }
+        .image_view img{
+            width: 100%;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="camera_wrap">
+        <div id="camera"></div>
+        <div id="take_picture" class="btn">拍照</div>
+    </div>
+    <div class="image_view">
+        <img id="photo" src="" alt="" srcset="">
+        <div id="dowload" class="btn">保存</div>
+    </div>
+</body>
+</html>
+<script src="./js/capture.js"></script>
+<script>
+    var Camera = Capture.create(takeSuccess,onFail,{
+        cameraWrap:"camera"
+    }); 
+    var imgShow=false;
+    function takeSuccess(imageData){
+        document.getElementById("photo").setAttribute("src",imageData);
+        if(!imgShow){
+            imgShow = true;
+            document.getElementsByClassName("image_view")[0].setAttribute("style","display:block;")
+        }
+    }
+    function onFail(){
+
+    }
+    document.getElementById("take_picture").addEventListener('click', function(){
+        Camera.takePicture()
+    })
+    function downloadIamge(selector, name) {
+        var image = new Image()
+        // 解决跨域 Canvas 污染问题
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0, image.width, image.height);
+            context.font="30px Arial";
+            context.fillStyle = "#edf1f7";
+            context.fillText("水印",image.width-80,image.height-30);
+            var url = canvas.toDataURL('image/png');
+
+            // 生成一个a元素
+            var a = document.createElement('a');
+            // 创建一个单击事件
+            var event = new MouseEvent('click');
+
+            // 将a的download属性设置为我们想要下载的图片名称，若name不存在则使用‘下载图片名称’作为默认名称
+            a.download = name || '下载图片名称';
+            // 将生成的URL设置为a.href属性
+            a.href = url;
+            // 触发a的单击事件
+            a.dispatchEvent(event);
+        }
+        image.src = document.getElementById(selector).src;
+    }
+    document.getElementById("dowload").addEventListener('click', function(){
+        downloadIamge("photo","照片")
+    })
+</script>
